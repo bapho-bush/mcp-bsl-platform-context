@@ -148,7 +148,13 @@ jobs:
     if: github.event_name == 'push'
     strategy:
       matrix:
-        dockerfile: ['Dockerfile.sse', 'Dockerfile.stdio']
+        include:
+          - dockerfile: Dockerfile.sse
+            image_suffix: sse
+          - dockerfile: Dockerfile.stdio
+            image_suffix: stdio
+          - dockerfile: Dockerfile.streamable
+            image_suffix: streamable
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -168,7 +174,7 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           push: false
-          tags: mcp-bsl-context:test-${{ matrix.dockerfile == 'Dockerfile.sse' && 'sse' || 'stdio' }}
+          tags: mcp-bsl-context:test-${{ matrix.image_suffix }}
           build-args: APP_VERSION=test
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -203,4 +209,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_KOTLIN: true
           VALIDATE_GRADLE: true
-        continue-on-error: true 
+        continue-on-error: true
